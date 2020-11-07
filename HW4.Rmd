@@ -1,0 +1,106 @@
+---
+title: "HW #4 "
+output: html_notebook
+---
+
+#1. For two of these variables (that are not symmetric), find a transformation which makes the dataset symmetric.  You can use any tool you want, including H quick method, inspection of mids, symmetry plots, etc.  Demonstrate that your transformation has been symmetric.
+```{r}
+library(LearnEDAfunctions)
+head(lake)
+```
+```{r}
+aplpack::stem.leaf(lake$Area)
+```
+```{r}
+lval(lake$Area)
+```
+The data is right-skewness
+```{r}
+symplot(lake$Area)
+```
+To remove the right-skewness that we see, we go down the ladder of powers and try powertransformationspthat are smaller thanp= 1.
+```{r}
+roots <- sqrt(lake$Area)
+aplpack::stem.leaf(roots)
+```
+```{r}
+symplot(roots)
+```
+We can see it also has some plots above the line.
+Let’s continue down the ladder of powers and try thep= 0power (logs). Again, we show thestemplot, the letter-value display and the symmetry plot.
+```{r}
+logs <- log(lake$Area)
+aplpack::stem.leaf(logs)
+```
+```{r}
+symplot(logs)
+```
+It can be seen that compared to the above figure, the data is obviously closer to symmetry.
+```{r}
+aplpack::stem.leaf(lake$Depth)
+```
+```{r}
+lval(lake$Depth)
+```
+```{r}
+symplot(lake$Depth)
+```
+We can see that all the points are above the straight line, so the data is skewed to the right.To remove the right-skewness that we see, we go down the ladder of powers and try powertransformationspthat are smaller thanp= 1.
+```{r}
+roots <- sqrt(lake$Depth)
+aplpack::stem.leaf(roots)
+```
+```{r}
+symplot(roots)
+```
+We can see obvious changes in the symmetry graph, and some points begin to appear on the straight line. The data began to become symmetrical.
+Let’s continue down the ladder of powers and try thep= 0power (logs). Again, we show thestemplot, the letter-value display and the symmetry plot.
+```{r}
+logs <- log(lake$Depth)
+aplpack::stem.leaf(logs)
+```
+```{r}
+symplot(logs)
+```
+We can see from the distribution of points that the distribution of data is more even and symmetric.
+#2.Find two datasets (at least 30 observations in each) that you are interested in that are not symmetric.  Find a transformation that makes each dataset symmetric and demonstrate that your transformation is effective in achieving approximate symmetry.
+```{r}
+aplpack::stem.leaf(braves.attendance$Attendance)
+```
+```{r}
+lval(braves.attendance$Attendance)
+```
+```{r}
+symplot(braves.attendance$Attendance)
+```
+We can see that all the points are above the straight line, so the data is skewed to the right.To remove the right-skewness that we see, we go down the ladder of powers and try powertransformationspthat are smaller thanp= 1.
+```{r}
+roots <- sqrt(braves.attendance$Attendance)
+symplot(roots)
+```
+Let’s continue down the ladder of powers and try thep= 0power (logs). Again, we show thestemplot, the letter-value display and the symmetry plot.
+```{r}
+logs <- log(braves.attendance$Attendance)
+symplot(logs)
+```
+We can see from the distribution of points that the distribution of data is more even and symmetric.
+```{r}
+aplpack::stem.leaf(NationlNames2$Count)
+```
+```{r}
+lval(NationlNames2$Count)
+```
+```{r}
+symplot(NationlNames2$Count)
+```
+We can see that the data on the right side of the median has a right-skewed phenomenon.
+```{r}
+roots <- sqrt(NationlNames2$Count)
+symplot(roots)
+```
+Let’s continue down the ladder of powers and try thep= 0power (logs). Again, we show thestemplot, the letter-value display and the symmetry plot.
+```{r}
+logs <- log(NationlNames2$Count)
+symplot(logs)
+```
+We can see from the distribution of points that the distribution of data is more even and symmetric.

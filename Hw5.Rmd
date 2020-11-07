@@ -1,0 +1,251 @@
+---
+title: "HW5 Zhaoyuan Cai"
+output: html_notebook
+---
+
+
+1.  Find some (x, y) data where you think x and y are strongly related.  Make a scatterplot and find the least-squares and resistant fits.  Plot the two sets of residuals.  Interpret the fit and the residuals.  Contrast the two methods of fitting – is it better to fit a resistant line?
+```{r}
+library(LearnEDAfunctions)
+```
+```{r}
+head(boston.marathon.wtimes)
+```
+We start by plotting these data on a scatterplot.
+```{r}
+with(boston.marathon.wtimes, plot(year, minutes, ylab = 'Min'))
+```
+As can be seen from the figure, the best time for marathon races from 1900 to 1980 is getting shorter and shorter. This shows that the level of marathon competition is getting higher and higher.
+
+
+In the below table, the data has been sorted by minutes.
+```{r}
+data <- tibble(boston.marathon.wtimes$year, boston.marathon.wtimes$minutes)
+sorted.data <- data[order(boston.marathon.wtimes$minutes),]
+round(sorted.data, 2)
+```
+Continue the data has been sorted by year
+```{r}
+data <- tibble(boston.marathon.wtimes$year, boston.marathon.wtimes$minutes)
+sorted.data <- data[order(boston.marathon.wtimes$year),]
+round(sorted.data, 2)
+```
+As expected, we see a pretty strong negative relationship. But what is evident is that this isnot a straight-line relationship. Rather it looks curved – a curve drawn through the pointsmakes this clear.
+```{r}
+with(boston.marathon.wtimes, plot(year, minutes, ylab = 'Min'))
+with(boston.marathon.wtimes, lines(lowess(year, minutes, f = 0.5)))
+```
+I find three summary points by breaking the x-values into three groups of approximate equal size (low, middle, and high), and finding the median x-value and the mediany-value in each group. Here the three summary points are:
+
+(xL, yL) = (1914,153),(xM, yM) = (1953,146),(xR, yR) = (1981,131).
+
+In the figure below, I’ve drawn vertical lines showing the division of the points into threegroups, and the summary points are indicated by red dots.
+```{r}
+plot(boston.marathon.wtimes$year, boston.marathon.wtimes$minutes, main = '3 Groups and Summary Points')
+abline(v = 1933)
+abline(v = 1967)
+s.points <- data.frame(x = c(1914, 1953, 1981), y = c(153, 146, 131))
+points(s.points, cex=2, pch=19, col="red")
+```
+We write the line in the form
+                    y=a0+b0(x−xc),
+We find the slope of this line by using the left and right summary points:
+                    b0=yR−yL/xR−xL.
+So b0 = -0.328
+To find the intercept
+  a0=1/3[yL−b0(xL−xC)] +yC+ [yR−b0(xR−xC)] = 146.39
+  
+So the three-group line is
+                      y = -0.328(x - 1953) + 146.39
+This line is graphed on the scatterplot below.      
+```{r}
+plot(boston.marathon.wtimes$year,boston.marathon.wtimes$minutes,main="Resistant Line")
+curve(-.328*(x - 1953) + 146.39, add = TRUE, col='red')
+```
+The equation of this line is FIT= -0.328(year - 1953) + 146.39
+```{r}
+Fit <- -0.328*(boston_marathon_wtimes$year - 1953) + 146.39
+Residual <-boston.marathon.wtimes$minutes - Fit
+plot(boston_marathon_wtimes$year, Residual,xlab = "Year", main = "Residual Graph from Fit to minutes")
+abline(h=0)
+```
+Summary
+  I think the residual image will be better in comparison. Because I can see the magnitude of the data deviation more intuitively from the residual graph.
+
+
+
+
+
+2.  Fit a resistant line to the following data (population of England and Wales in millions for different years).   Data is stored in the file pop.england in the LearnEDA package.  Plot the residuals and summarize the results.
+```{r}
+library(LearnEDAfunctions)
+head(pop.england)
+```
+```{r}
+with(pop.england,plot(YEAR,POPULATION, ylab = "Population"))
+```
+Obviously the population of the England. has been increasing over time and that’s the mainmessage from this graph.
+```{r}
+#Fitting a line to the population
+with(pop.england,plot(YEAR,POPULATION, ylab = "Population"))
+abline(a=-487, b=0.2727)
+```
+The equation of this line is 
+              FIT = 0.2727YEAR -487
+After we have described the fit, then we look at the residuals. For each year, we compute
+              RESIDUAL=POPULATION−FIT
+and we graph the residuals against the year
+```{r}
+Fit <- -487 + 0.2727*pop.england$YEAR
+Residual <- pop.england$POPULATION - Fit
+plot(pop.england$YEAR, Residual, xlab = "Year", main = "Residual Graph from Fit to Population")
+abline(h=0)
+```
+Summary
+We can see that the residuals in the early years were strong patterns, and the residuals from 1840-1890 were relatively stable. There was another large fluctuation from 1900 to 1920.
+
+3.  For the following problems (from Tukey, EDA)
+(a)   straighten plot using transformations applied on summary points
+```{r}
+head(tukey.26a)
+```
+```{r}
+library(LearnEDAfunctions)
+```
+```{r}
+straightening.work <- function(sp,px,py){
+  sp$tx <-with(sp, (x ^ px - 1) / px)
+  sp$ty <-with(sp, (y ^ py - 1) / py)
+  sp$slope[1] <-with(sp,diff(ty[1:2]) /diff(tx[1:2]))
+  sp$slope[2] <-with(sp,diff(ty[2:3]) /diff(tx[2:3]))
+  sp$half.slope.ratio <-with(sp, slope[2] / slope[1])
+  sp$slope[3] <- NA
+  sp$half.slope.ratio[2:3] <- NA
+  row.names(sp) <-c("Left", "Center", "Right")
+  sp}
+x_a<-tukey.26a$temp
+y_a<-tukey.26a$rate
+summary.points_1 <- data.frame(x=c(23,27.5,32),y=c(388,882.5,202))
+with(tukey.26a, plot(x_a, y_a))
+points(summary.points_1, cex=2, pch=19, col="red")
+abline(lm(y ~ x, data=summary.points_1[1:2, ]), col="blue")
+abline(lm(y ~ x, data=summary.points_1[2:3, ]), col="blue")
+```
+
+```{r}
+head(tukey.26b)
+```
+```{r}
+straightening.work <- function(sp,px,py){
+  sp$tx <-with(sp, (x ^ px - 1) / px)
+  sp$ty <-with(sp, (y ^ py - 1) / py)
+  sp$slope[1] <-with(sp,diff(ty[1:2]) /diff(tx[1:2]))
+  sp$slope[2] <-with(sp,diff(ty[2:3]) /diff(tx[2:3]))
+  sp$half.slope.ratio <-with(sp, slope[2] / slope[1])
+  sp$slope[3] <- NA
+  sp$half.slope.ratio[2:3] <- NA
+  row.names(sp) <-c("Left", "Center", "Right")
+  sp}
+x_a<-tukey.26b$year
+y_a<-tukey.26b$deposits
+summary.points_2<-data.frame(x=c(44,51,58),y=c(927,1212,1896))
+with(tukey.26b,plot(x_a,y_a))
+points(summary.points_2, cex=2, pch=19, col="red")
+abline(lm(y ~ x, data=summary.points_2[1:2, ]), col="blue")
+abline(lm(y ~ x, data=summary.points_2[2:3, ]), col="blue")
+```
+```{r}
+head(tukey.26c)
+```
+```{r}
+straightening.work <- function(sp,px,py){
+  sp$tx <-with(sp, (x ^ px - 1) / px)
+  sp$ty <-with(sp, (y ^ py - 1) / py)
+  sp$slope[1] <-with(sp,diff(ty[1:2]) /diff(tx[1:2]))
+  sp$slope[2] <-with(sp,diff(ty[2:3]) /diff(tx[2:3]))
+  sp$half.slope.ratio <-with(sp, slope[2] / slope[1])
+  sp$slope[3] <- NA
+  sp$half.slope.ratio[2:3] <- NA
+  row.names(sp) <-c("Left", "Center", "Right")
+  sp}
+x_a<-tukey.26c$year
+y_a<-tukey.26c$miles
+summary.points_3<-data.frame(x=c(42.75,48.5,54.25),y=c(1580,6431,17531.5))
+with(tukey.26c,plot(x_a,y_a))
+points(summary.points_3, cex=2, pch=19, col="red")
+abline(lm(y ~ x, data=summary.points_3[1:2, ]), col="blue")
+abline(lm(y ~ x, data=summary.points_3[2:3, ]), col="blue")
+```
+(b)   fit a line to the transformed plots and plot the residuals
+
+```{r}
+straightening.work(summary.points_1,1,1)
+```
+Bingo – the half-slope ratio is bHS= -1.376, so it appears that we’ve straightened the plot bytransforming x to the 1 power and y to the 1 power.
+```{r}
+new.x <- tukey.26a$temp^1
+new.y <- 1/tukey.26a$rate
+plot(new.x, new.y)
+```
+```{r}
+fit <- rline(new.x,new.y,iter = 5)
+```
+```{r}
+data<-data.frame(new.x,new.y)
+myfit<-rline(new.y~new.x,data,iter = 1)
+myfit
+FIT <- with(myfit, a+b*(new.x-xC))
+```
+```{r}
+plot(new.x, myfit$residual, ylab="Residual")
+abline(h=0)
+```
+```{r}
+straightening.work(summary.points_2,-0.33,-1)
+```
+Bingo – the half-slope ratio is bHS= 1.4097, so it appears that we’ve straightened the plot bytransforming x to the -0.33 power and y to the -1 power.
+```{r}
+new.x <- -tukey.26b$year^(-0.33)
+new.y <- -1/tukey.26b$deposits
+plot(new.x, new.y)
+```
+```{r}
+data<-data.frame(new.x,new.y)
+myfit<-rline(new.y~new.x,data,iter = 1)
+myfit
+FIT <- with(myfit, a+b*(new.x-xC))
+```
+```{r}
+plot(new.x, myfit$residual, ylab="Residual")
+abline(h=0)
+```
+```{r}
+straightening.work(summary.points_3,0.001,0.001)
+```
+Bingo – the half-slope ratio is bHS= 0.8055, so it appears that we’ve straightened the plot bytransforming x to the 0.001 power and y to the 0.001 power.
+```{r}
+new.x <- tukey.26c$year^0.001
+new.y <- 0.001/tukey.26c$miles
+plot(new.x, new.y)
+```
+```{r}
+data<-data.frame(new.x,new.y)
+myfit<-rline(new.y~new.x,data,iter = 1)
+myfit
+FIT <- with(myfit, a+b*(new.x-xC))
+```
+```{r}
+plot(new.x, myfit$residual, ylab="Residual")
+abline(h=0)
+```
+(c)   summarize all results
+
+tukey_26a the half-slope ratio is negative, the half-slopes have different signs, and re-expression will not help.
+
+tukey_26b There were some unusual demand deposits in the early years, banks should pay attention to these points
+
+tukey_26c Most of the passenger trips stabilized between 10037 and 10041, with only small fluctuations. There are a small number of passengers with a small number of trips in the data that produce a small number of unusual points.
+
+
+             
+             

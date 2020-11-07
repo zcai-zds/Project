@@ -1,0 +1,234 @@
+---
+title: "HW6 Zhaoyuan Cai"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+
+
+
+#PART A
+```{r}
+library(LearnEDAfunctions)
+```
+```{r}
+head(church.tseries)
+```
+```{r}
+head(boston_marathon_wtimes)
+```
+1.  Using R, perform a resistant smooth (3RSSH, twice) to your data.  Save the smooth (the fit) and the rough (the residuals).
+
+2.  Plot the smooth (using a smooth curve) and describe the general patterns that you see.  Don’t assume that anything is obvious – pretend that you are explaining this to someone who doesn’t have any background in statistics.
+
+3.  Plot the rough (as a time series plotting individual points).  Do you see any general patterns in the rough?
+
+4.  Construct a stemplot and letter value display of the sizes of the rough.  (The size is the absolute value of the rough.)   Set up fences and look for outliers.  Summarize what you have learned.  (What is a typical size of a residual?  Are there any unusually large residuals?)
+
+For church.tseries
+```{r}
+smooth.3R1 <- smooth(church.tseries$worship, kind = "3R")
+smooth.3R1[1:209]
+```
+For boston_marathon_wtimes
+```{r}
+smooth.3R2 <- smooth(boston_marathon_wtimes$minutes, kind = "3R")
+smooth.3R2[1:99]
+```
+#church.tseries
+
+repeat this splitting twice – the resulting smooth is called “3RSS”. Here is a graphof this smooth.
+```{r}
+smooth.3RSS1 <- smooth(church_tseries$worship, 
+                       kind = "3RSS")
+with(church_tseries,
+      plot(year, smooth.3R1,type="l",col="red",lwd=2,
+      xlab = "YEAR", ylab = "WORSHIP",
+      main = "3R and 3RSS Smooths",
+      ylim = c(200,600)))
+with(church_tseries,
+     lines(year, smooth.3RSS1, col="red"))
+legend("topleft",
+       legend = c("3R", "3RSS"),
+       lty=1, col=c("blue", "red"))
+
+```
+```{r}
+smooth.3RSSH1 <- han(smooth.3RSS1)
+with(church_tseries,
+     plot(year, smooth.3RSSH1,, type="l",col="red",lwd=2,
+     xlab = "YEAR", ylab = "WORSHIP",
+     main = "3RSSH SMOOTH", ylim = c(200,600)))
+```
+```{r}
+Rough1 <- with(church_tseries, 
+               worship - smooth.3RSSH1)
+with(church_tseries,
+     head(cbind(church_tseries, smooth.3RSSH1, Rough1)))
+```
+```{r}
+options(width = 60)
+as.vector(Rough1)
+```
+```{r}
+smooth.3RS3R.twice <- smooth(church_tseries$worship, 
+                             kind = "3RS3R", twiceit = TRUE)
+with(church_tseries,
+     plot(year, smooth.3RS3R.twice,
+          col="red", lwd=2,  type="l",
+          main="3RSSR, Twice Smooth"))
+```
+In this smooth we can see:
+  From 1993 to 1996, the average number of church worships per year has gradually increased, which shows that more and more people worship religion.
+
+Next, we plot the rough to see the deviations from the general pattern that we see in thesmooth.
+```{r}
+FinalRough1 <- church_tseries$worship - smooth.3RS3R.twice
+plot(church_tseries$year, FinalRough1,
+    pch=19, cex=1.3, xlab="YEAR", ylab="WORSHIP")
+abline(h=0,lwd=3,col="blue")
+```
+In the rough we can see:
+  There were two extreme values in the number of worships in 1995. In other words, there were very many worships in some months and very few worships in some months. I guess the reason may be that there were some religious reform incidents that happened this year. And this situation disappeared in 1996
+  I don’t see any general pattern in the rough when plotted as a function of time.
+  
+```{r}
+aplpack::stem.leaf(church_tseries$worship)
+```
+```{r}
+fivenum(church_tseries$worship)
+```
+DF=F(U)-F(L)=7.95
+STEP=1.5*DF=11.93
+LOW FENCE=F(L)-STEP=-8.28
+HIGH FENCE=F(U)+STEP=23.53
+ There are three unusual and large residuals 522，535，539
+
+#boston.marathon.wtimes 
+```{r}
+smooth.3RSS2 <- smooth(boston.marathon.wtimes$minutes, 
+                       kind = "3RSS")
+with(boston_marathon_wtimes,
+      plot(year, smooth.3R2,type="l",col="red",lwd=2,
+      xlab = "YEAR", ylab = "MINUTES",
+      main = "3R and 3RSS Smooths",
+      ylim = c(100,200)))
+with(boston.marathon.wtimes,
+     lines(year, smooth.3RSS2, col="red"))
+legend("topleft",
+       legend = c("3R", "3RSS"),
+       lty=1, col=c("blue", "red"))
+```
+```{r}
+smooth.3RSSH2 <- han(smooth.3RSS2)
+with(boston_marathon_wtimes,
+     plot(year, smooth.3RSSH2,, type="l",col="red",lwd=2,
+     xlab = "YEAR", ylab = "MINUTES",
+     main = "3RSSH SMOOTH", ylim = c(100,200)))
+```
+```{r}
+Rough2 <- with(boston_marathon_wtimes, 
+               minutes - smooth.3RSSH2)
+with(boston_marathon_wtimes,
+     head(cbind(boston_marathon_wtimes, smooth.3RSSH2, Rough2)))
+```
+```{r}
+smooth.3RS3R.twice2 <- smooth(boston_marathon_wtimes$minutes, 
+                             kind = "3RS3R", twiceit = TRUE)
+with(boston_marathon_wtimes,
+     plot(year, smooth.3RS3R.twice2,
+          col="red", lwd=2,  type="l",
+          main="3RSSR, Twice Smooth"))
+```
+In this smooth we can see
+    1.The general trend of the time spent by the marathon winners has     become shorter, indicating that the level of athletes has become higher and higher.
+    2.From 1920 to 1940, the time for the completion of the game showed a slight upward trend, and then declined rapidly. Probably because the newcomers have surpassed the previous athletes after training.
+
+Next, we plot the rough to see the deviations from the general pattern that we see in thesmooth.
+```{r}
+FinalRough2 <- boston_marathon_wtimes$minutes - smooth.3RS3R.twice2
+plot(boston_marathon_wtimes$year, FinalRough2,
+    pch=19, cex=1.3, xlab="YEAR", ylab="MINUTES")
+abline(h=0,lwd=3,col="blue")
+```
+In this rough we can see:
+  1.Approximately in 1908, the time taken to complete the marathon showed an extreme value of 0+30. This shows that the level of competition in that year was the worst.
+  2.It can be seen that the best results of the marathon in the early years were uneven, and the more stable the later the race. Explain that the level of athletes is becoming uniform.
+  3.I don’t see any general pattern in the rough when plotted as a function of time.Most ofthe rough values are between -5 and +5 which translate to attendance values between-50 and +50.
+
+```{r}
+aplpack::stem.leaf(boston_marathon_wtimes$minutes)
+```
+```{r}
+fivenum(boston_marathon_wtimes$minutes)
+```
+DF=F(U)-F(L)=16.5
+STEP=1.5*DF=24.75
+LOW FENCE=F(L)-STEP=109.75
+HIGH FENCE=F(U)+STEP=175.75
+No outliers
+
+
+#PART B
+```{r}
+SNAP_history <- read.csv("~/Desktop/MSA 5470/SNAP_history.csv")
+View(SNAP_history)
+```
+```{r}
+smooth.3R3 <- smooth(SNAP_history$Benefit, kind = "3R")
+smooth.3R3[1:51]
+```
+```{r}
+smooth.3RSS3 <- smooth(SNAP_history$Benefit, 
+                       kind = "3RSS")
+with(SNAP_history,
+      plot(year, smooth.3R3,type="l",col="red",lwd=2,
+      xlab = "YEAR", ylab = "BENEFIT",
+      main = "3R and 3RSS Smooths",
+      ylim = c(5,150)))
+with(SNAP_history,
+     lines(year, smooth.3RSS3, col="red"))
+legend("topleft",
+       legend = c("3R", "3RSS"),
+       lty=1, col=c("blue", "red"))
+```
+```{r}
+smooth.3RSSH3 <- han(smooth.3RSS3)
+with(SNAP_history,
+     plot(year, smooth.3RSSH3,, type="l",col="red",lwd=2,
+     xlab = "YEAR", ylab = "BENEFIT",
+     main = "3RSSH SMOOTH", ylim = c(5,150)))
+```
+```{r}
+Rough3 <- with(SNAP_history, 
+               Benefit - smooth.3RSSH3)
+with(SNAP_history,
+     head(cbind(SNAP_history, smooth.3RSSH3, Rough3)))
+```
+```{r}
+smooth.3RS3R.twice3 <- smooth(SNAP_history$Benefit, 
+                             kind = "3RS3R", twiceit = TRUE)
+with(SNAP_history,
+     plot(year, smooth.3RS3R.twice3,
+          col="red", lwd=2,  type="l",
+          main="3RSSR, Twice Smooth"))
+```
+In this smooth we can se
+  SNAP's personal income maintains an upward trend. However, there was a slight decline from 2010 to 2020 and then stabilized, indicating that there may be economic problems such as poor product sales. But finally stabilized under a trend.
+```{r}
+FinalRough3 <- SNAP_history$Benefit - smooth.3RS3R.twice3
+plot(SNAP_history$year, FinalRough3,
+    pch=19, cex=1.3, xlab="YEAR", ylab="BENEFIT")
+abline(h=0,lwd=3,col="blue")
+```
+In this rough we can se
+  1.At about 2019, the company's personal income was an unusual point, much higher than normal. The reason may be that product sales in 2019 have skyrocketed and customer demand has driven the economy.
+  2.I don’t see any general pattern in the rough when plotted as a function of time.Most ofthe rough values are 0.
+
+
+
+
+
